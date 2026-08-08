@@ -178,38 +178,37 @@ export default async (req: Request) => {
       } catch (error: any) {
         console.error(`Erreur avec ${model}:`, error);
 
+        // Si quota atteint → on passe au suivant
         if (error?.status === 429) {
           lastError = error;
           continue;
         }
 
+        // Autre erreur → on stop
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
+
         return Response.json(
           {
             error: "Erreur lors de la génération de la réponse.",
-            details: error instanceof Error ? error.message : String(error),
+            details: errorMessage,
           },
           { status: 500 },
         );
       }
     }
 
+    // Si tous les modèles sont bloqués
     return Response.json(
       {
         error: "Limite gratuite atteinte.",
-        message: "Tous les modèles sont temporairement indisponibles.",
+        message:
+          "Tous les modèles sont temporairement indisponibles. Réessaie plus tard.",
         details: lastError?.message,
       },
       { status: 429 },
     );
   } catch (error: any) {
-    console.error("Erreur globale :", error);
-
-    return Response.json(
-      {
-        error: "Erreur serveur.",
-        details: error instanceof Error ? error.message : String(error),
-      },
-      { status: 500 },
-    );
+    console.error("Erreur inattendue :", error);
   }
 };
