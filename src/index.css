@@ -1,0 +1,138 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg-main: #0f1c2e;
+    --bg-panel: #0b1420;
+    --paper: #f5f6f8;
+    --ink: #e7ebf0;
+    --ink-dim: #8996a8;
+    --ink-dark: #1b2430;
+    --gold: #e7b73c;
+    --gold-dim: rgba(231, 183, 60, 0.15);
+    --line: rgba(231, 235, 240, 0.12);
+  }
+
+  body {
+    font-family: 'Plus Jakarta Sans', 'Work Sans', system-ui, -apple-system, sans-serif;
+  }
+
+  /* Custom subtle scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(231, 235, 240, 0.15);
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(231, 235, 240, 0.25);
+  }
+}
+
+/* Markdown styling inside assistant response */
+.prose-tremplin {
+  color: #e7ebf0;
+  font-size: 0.925rem;
+  line-height: 1.65;
+}
+
+.prose-tremplin h1,
+.prose-tremplin h2,
+.prose-tremplin h3,
+.prose-tremplin h4 {
+  color: #ffffff;
+  font-weight: 700;
+  margin-top: 1.1em;
+  margin-bottom: 0.4em;
+  letter-spacing: -0.01em;
+}
+
+.prose-tremplin h1 { font-size: 1.25rem; }
+.prose-tremplin h2 { font-size: 1.125rem; color: #f2c94c; }
+.prose-tremplin h3 { font-size: 1.025rem; }
+
+.prose-tremplin p {
+  margin-bottom: 0.85em;
+}
+
+.prose-tremplin p:last-child {
+  margin-bottom: 0;
+}
+
+.prose-tremplin ul,
+.prose-tremplin ol {
+  padding-left: 1.35rem;
+  margin-bottom: 0.85em;
+}
+
+.prose-tremplin ul {
+  list-style-type: disc;
+}
+
+.prose-tremplin ol {
+  list-style-type: decimal;
+}
+
+.prose-tremplin li {
+  margin-bottom: 0.35em;
+}
+
+.prose-tremplin code {
+  font-family: 'JetBrains Mono', monospace;
+  background: rgba(231, 183, 60, 0.12);
+  color: #fce881;
+  padding: 0.15em 0.4em;
+  border-radius: 4px;
+  font-size: 0.875em;
+}
+
+.prose-tremplin pre {
+  background: #080f19;
+  border: 1px solid rgba(231, 235, 240, 0.12);
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  overflow-x: auto;
+  margin: 0.85em 0;
+}
+
+.prose-tremplin pre code {
+  background: transparent;
+  padding: 0;
+  color: #e7ebf0;
+}
+
+.prose-tremplin blockquote {
+  border-left: 3px solid #e7b73c;
+  padding-left: 0.85rem;
+  margin: 0.85em 0;
+  color: #c0cddb;
+  font-style: italic;
+}
+
+.prose-tremplin strong {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.prose-tremplin table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.85em 0;
+}
+
+.prose-tremplin th,
+.prose-tremplin td {
+  border: 1px solid rgba(231, 235, 240, 0.15);
+  padding: 6px 10px;
+  text-align: left;
+}
+
+.prose-tremplin th {
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+}
