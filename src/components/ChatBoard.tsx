@@ -1,18 +1,17 @@
-import React, { useRef, useEffect } from 'react';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 import {
-  Sparkles,
-  Copy,
-  Check,
-  RotateCcw,
   BookOpen,
   Calculator,
+  Check,
   Compass,
+  Copy,
   GraduationCap,
   Maximize2,
-} from 'lucide-react';
-import { Message, QuickAction } from '../types';
+  Sparkles,
+} from "lucide-react";
+import React, { useEffect, useRef } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import { Message, QuickAction } from "../types";
 
 interface ChatBoardProps {
   messages: Message[];
@@ -36,7 +35,7 @@ export const ChatBoard: React.FC<ChatBoardProps> = ({
 
   // Auto scroll to bottom on new messages or loading state
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isLoading]);
 
   const handleCopy = (id: string, text: string) => {
@@ -46,14 +45,26 @@ export const ChatBoard: React.FC<ChatBoardProps> = ({
   };
 
   const subjectBadges = [
-    { label: 'Mathématiques & Algèbre', icon: <Calculator className="w-3.5 h-3.5" /> },
-    { label: 'Physique & Chimie', icon: <Compass className="w-3.5 h-3.5" /> },
-    { label: 'Français & Dissertation', icon: <BookOpen className="w-3.5 h-3.5" /> },
-    { label: 'Culture Générale & Droit', icon: <GraduationCap className="w-3.5 h-3.5" /> },
+    {
+      label: "Mathématiques & Algèbre",
+      icon: <Calculator className="w-3.5 h-3.5" />,
+    },
+    { label: "Physique & Chimie", icon: <Compass className="w-3.5 h-3.5" /> },
+    {
+      label: "Français & Dissertation",
+      icon: <BookOpen className="w-3.5 h-3.5" />,
+    },
+    {
+      label: "Culture Générale & Droit",
+      icon: <GraduationCap className="w-3.5 h-3.5" />,
+    },
   ];
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6" id="tremplin-chatboard">
+    <div
+      className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6"
+      id="tremplin-chatboard"
+    >
       {messages.length === 0 ? (
         <div className="h-full min-h-[420px] flex flex-col items-center justify-center text-center max-w-xl mx-auto py-8">
           <div className="w-14 h-14 mb-4 shadow-lg rounded-2xl overflow-hidden">
@@ -65,10 +76,34 @@ export const ChatBoard: React.FC<ChatBoardProps> = ({
               xmlns="http://www.w3.org/2000/svg"
             >
               <rect x="1" y="1" width="30" height="30" rx="9" fill="#141A28" />
-              <rect x="1" y="1" width="30" height="30" rx="9" stroke="#3A4258" strokeWidth="1" />
-              <path d="M7.5 21.5H21" stroke="#B08A2E" strokeWidth="2.3" strokeLinecap="round" />
-              <path d="M10.6 21.5v-3.6" stroke="#B08A2E" strokeWidth="2.3" strokeLinecap="round" />
-              <path d="M21 21.3c.2-5.1 2.3-8.5 5-9.9" stroke="#B08A2E" strokeWidth="1.8" strokeLinecap="round" strokeDasharray="0.5 3.6" />
+              <rect
+                x="1"
+                y="1"
+                width="30"
+                height="30"
+                rx="9"
+                stroke="#3A4258"
+                strokeWidth="1"
+              />
+              <path
+                d="M7.5 21.5H21"
+                stroke="#B08A2E"
+                strokeWidth="2.3"
+                strokeLinecap="round"
+              />
+              <path
+                d="M10.6 21.5v-3.6"
+                stroke="#B08A2E"
+                strokeWidth="2.3"
+                strokeLinecap="round"
+              />
+              <path
+                d="M21 21.3c.2-5.1 2.3-8.5 5-9.9"
+                stroke="#B08A2E"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeDasharray="0.5 3.6"
+              />
               <circle cx="26.3" cy="10.6" r="2.2" fill="#D9B24E" />
             </svg>
           </div>
@@ -77,7 +112,8 @@ export const ChatBoard: React.FC<ChatBoardProps> = ({
             Pose ta première question
           </h2>
           <p className="text-sm text-[#8996a8] max-w-md leading-relaxed mb-6">
-            Colle un exercice, joins une photo de ton énoncé ou demande une méthode de révision. Le tuteur Tremplin t'accompagne pas-à-pas.
+            Colle un exercice, joins une photo de ton énoncé ou demande une
+            méthode de révision. Le tuteur Tremplin t'accompagne pas-à-pas.
           </p>
 
           {/* Subject pills */}
@@ -114,12 +150,12 @@ export const ChatBoard: React.FC<ChatBoardProps> = ({
       ) : (
         <div className="space-y-6 max-w-4xl mx-auto">
           {messages.map((m) => {
-            const isUser = m.role === 'user';
+            const isUser = m.role === "user";
             return (
               <div
                 key={m.id}
                 id={`message-row-${m.id}`}
-                className={`flex gap-3 ${isUser ? 'justify-end' : 'justify-start'}`}
+                className={`flex gap-3 ${isUser ? "justify-end" : "justify-start"}`}
               >
                 {!isUser && (
                   <div className="w-8 h-8 shrink-0 mt-1 shadow-sm rounded-lg overflow-hidden">
@@ -130,11 +166,42 @@ export const ChatBoard: React.FC<ChatBoardProps> = ({
                       fill="none"
                       xmlns="http://www.w3.org/2000/svg"
                     >
-                      <rect x="1" y="1" width="30" height="30" rx="9" fill="#141A28" />
-                      <rect x="1" y="1" width="30" height="30" rx="9" stroke="#3A4258" strokeWidth="1" />
-                      <path d="M7.5 21.5H21" stroke="#B08A2E" strokeWidth="2.3" strokeLinecap="round" />
-                      <path d="M10.6 21.5v-3.6" stroke="#B08A2E" strokeWidth="2.3" strokeLinecap="round" />
-                      <path d="M21 21.3c.2-5.1 2.3-8.5 5-9.9" stroke="#B08A2E" strokeWidth="1.8" strokeLinecap="round" strokeDasharray="0.5 3.6" />
+                      <rect
+                        x="1"
+                        y="1"
+                        width="30"
+                        height="30"
+                        rx="9"
+                        fill="#141A28"
+                      />
+                      <rect
+                        x="1"
+                        y="1"
+                        width="30"
+                        height="30"
+                        rx="9"
+                        stroke="#3A4258"
+                        strokeWidth="1"
+                      />
+                      <path
+                        d="M7.5 21.5H21"
+                        stroke="#B08A2E"
+                        strokeWidth="2.3"
+                        strokeLinecap="round"
+                      />
+                      <path
+                        d="M10.6 21.5v-3.6"
+                        stroke="#B08A2E"
+                        strokeWidth="2.3"
+                        strokeLinecap="round"
+                      />
+                      <path
+                        d="M21 21.3c.2-5.1 2.3-8.5 5-9.9"
+                        stroke="#B08A2E"
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
+                        strokeDasharray="0.5 3.6"
+                      />
                       <circle cx="26.3" cy="10.6" r="2.2" fill="#D9B24E" />
                     </svg>
                   </div>
@@ -145,8 +212,8 @@ export const ChatBoard: React.FC<ChatBoardProps> = ({
                     relative group max-w-[88%] sm:max-w-[78%] rounded-2xl p-4 sm:p-5
                     ${
                       isUser
-                        ? 'bg-[#f5f6f8] text-[#1b2430] rounded-br-sm shadow-md'
-                        : 'bg-[#0b1420] border border-[#e7ebf0]/10 text-[#e7ebf0] rounded-tl-sm'
+                        ? "bg-[#f5f6f8] text-[#1b2430] rounded-br-sm shadow-md"
+                        : "bg-[#0b1420] border border-[#e7ebf0]/10 text-[#e7ebf0] rounded-tl-sm"
                     }
                   `}
                 >
@@ -206,7 +273,9 @@ export const ChatBoard: React.FC<ChatBoardProps> = ({
 
                         <span className="text-white/20">·</span>
                         <span className="text-[10px] text-[#8996a8]/70">
-                          {m.provider ? `Généré via ${m.provider}` : 'Tremplin IA'}
+                          {m.provider
+                            ? `Généré via ${m.provider}`
+                            : "Tremplin IA"}
                         </span>
                       </div>
                     </div>
@@ -223,7 +292,7 @@ export const ChatBoard: React.FC<ChatBoardProps> = ({
                 <Sparkles className="w-4 h-4 text-[#e7b73c] animate-pulse" />
               </div>
               <div className="bg-[#0b1420] border border-[#e7ebf0]/10 rounded-2xl rounded-tl-sm p-4 text-[#8996a8] flex items-center gap-2">
-                <span className="text-xs">Le tuteur Tremplin analyse et rédige la correction...</span>
+                <span className="text-xs">Tuteur Tremplin...</span>
                 <div className="flex items-center gap-1 ml-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-[#e7b73c] animate-bounce [animation-delay:0ms]"></span>
                   <span className="w-1.5 h-1.5 rounded-full bg-[#e7b73c] animate-bounce [animation-delay:150ms]"></span>

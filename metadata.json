@@ -1,6 +1,6 @@
 {
-  "name": "Tremplin — Tuteur de Concours",
-  "description": "Tuteur pédagogique personnel pour concours : corrections d'exercices avec analyse d'images et techniques de révision.",
+  "name": "Tremplin — Tuteur d'Examen",
+  "description": "Tuteur pédagogique personnel pour examens : corrections d'exercices avec analyse d'images et techniques de révision.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

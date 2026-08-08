@@ -1,8 +1,8 @@
-import express from 'express';
-import path from 'path';
-import dotenv from 'dotenv';
-import { createServer as createViteServer } from 'vite';
-import { GoogleGenAI } from '@google/genai';
+import { GoogleGenAI } from "@google/genai";
+import dotenv from "dotenv";
+import express from "express";
+import path from "path";
+import { createServer as createViteServer } from "vite";
 
 dotenv.config();
 
@@ -18,7 +18,7 @@ function getGeminiClient(): GoogleGenAI | null {
       apiKey,
       httpOptions: {
         headers: {
-          'User-Agent': 'aistudio-build',
+          "User-Agent": "aistudio-build",
         },
       },
     });
@@ -26,7 +26,7 @@ function getGeminiClient(): GoogleGenAI | null {
   return geminiClient;
 }
 
-const DEFAULT_SYSTEM_PROMPT = `Tu es le tuteur pédagogique personnel intégré à "Tremplin", une plateforme d'excellence pour la préparation aux concours pour des étudiants francophones, toutes matières confondues (Mathématiques, Sciences Physiques, SVT, Français, Culture Générale, Économie, Droit, Logique & Tests psychotechniques).
+const DEFAULT_SYSTEM_PROMPT = `Tu es le tuteur pédagogique personnel intégré à « Tremplin », une plateforme d’excellence dédiée à la préparation aux examens pour les élèves en classes d’examen, notamment de 3e et de Terminale. Elle couvre l’ensemble des matières essentielles : Mathématiques, Physique-Chimie, SVT, Français, Anglais, Histoire-Géographie et Philosophie'.
 
 Règle n°1 — Longueur de la réponse :
 Par défaut, réponds de façon SIMPLE, DIRECTE et COURTE : donne le résultat ou la réponse finale, bien structuré, sans détailler chaque étape de calcul ni justifier la méthode. Exemple : si on te demande "1+1", réponds "1 + 1 = 2", pas plus.
@@ -56,29 +56,39 @@ async function startServer() {
   const app = express();
 
   // Support JSON with larger payload for image uploads
-  app.use(express.json({ limit: '30mb' }));
+  app.use(express.json({ limit: "30mb" }));
 
   // API Status & Configuration endpoint
-  app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok' });
+  app.get("/api/health", (req, res) => {
+    res.json({ status: "ok" });
   });
 
-  app.get('/api/config', (req, res) => {
-    const hasGemini = Boolean(process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== 'MY_GEMINI_API_KEY');
-    const hasAnthropic = Boolean(process.env.ANTHROPIC_API_KEY && process.env.ANTHROPIC_API_KEY.trim() !== '');
+  app.get("/api/config", (req, res) => {
+    const hasGemini = Boolean(
+      process.env.GEMINI_API_KEY &&
+      process.env.GEMINI_API_KEY !== "MY_GEMINI_API_KEY",
+    );
+    const hasAnthropic = Boolean(
+      process.env.ANTHROPIC_API_KEY &&
+      process.env.ANTHROPIC_API_KEY.trim() !== "",
+    );
     res.json({
       hasGeminiKey: hasGemini,
       hasAnthropicKey: hasAnthropic,
-      activeProvider: hasGemini ? 'Gemini 3.6 Flash' : hasAnthropic ? 'Anthropic Claude' : 'Aucune clé configurée',
+      activeProvider: hasGemini
+        ? "Gemini 3.6 Flash"
+        : hasAnthropic
+          ? "Anthropic Claude"
+          : "Aucune clé configurée",
     });
   });
 
   // Main Chat endpoint for Tremplin Tutor
-  app.post('/api/chat', async (req, res) => {
+  app.post("/api/chat", async (req, res) => {
     try {
       const {
         messages = [],
-        prompt = '',
+        prompt = "",
         attachedImage = null,
         systemPrompt = DEFAULT_SYSTEM_PROMPT,
       } = req.body;
@@ -87,32 +97,40 @@ async function startServer() {
       const anthropicKey = process.env.ANTHROPIC_API_KEY;
 
       // 1. Try Gemini API first (standard in AI Studio)
-      if (apiKey && apiKey !== 'MY_GEMINI_API_KEY') {
+      if (apiKey && apiKey !== "MY_GEMINI_API_KEY") {
         const ai = getGeminiClient();
         if (!ai) {
-          return res.status(500).json({ error: 'Échec d\'initialisation du client Gemini.' });
+          return res
+            .status(500)
+            .json({ error: "Échec d'initialisation du client Gemini." });
         }
 
         // Construct contents array for Gemini
         const contents: Array<{
-          role: 'user' | 'model';
-          parts: Array<{ text?: string; inlineData?: { mimeType: string; data: string } }>;
+          role: "user" | "model";
+          parts: Array<{
+            text?: string;
+            inlineData?: { mimeType: string; data: string };
+          }>;
         }> = [];
 
         // Add history turns (skip last if it's the current one)
         for (const msg of messages) {
           contents.push({
-            role: msg.role === 'assistant' ? 'model' : 'user',
-            parts: [{ text: msg.text || '' }],
+            role: msg.role === "assistant" ? "model" : "user",
+            parts: [{ text: msg.text || "" }],
           });
         }
 
         // Current turn
-        const currentParts: Array<{ text?: string; inlineData?: { mimeType: string; data: string } }> = [];
+        const currentParts: Array<{
+          text?: string;
+          inlineData?: { mimeType: string; data: string };
+        }> = [];
 
         if (attachedImage && attachedImage.data) {
           // Normalize mimeType (default to image/jpeg or image/png)
-          const mimeType = attachedImage.mediaType || 'image/jpeg';
+          const mimeType = attachedImage.mediaType || "image/jpeg";
           currentParts.push({
             inlineData: {
               mimeType,
@@ -121,16 +139,21 @@ async function startServer() {
           });
         }
 
-        const userText = prompt && prompt.trim() ? prompt : attachedImage ? 'Peux-tu analyser et corriger cet exercice joint ?' : 'Bonjour !';
+        const userText =
+          prompt && prompt.trim()
+            ? prompt
+            : attachedImage
+              ? "Peux-tu analyser et corriger cet exercice joint ?"
+              : "Bonjour !";
         currentParts.push({ text: userText });
 
         contents.push({
-          role: 'user',
+          role: "user",
           parts: currentParts,
         });
 
         const response = await ai.models.generateContent({
-          model: 'gemini-3.6-flash',
+          model: "gemini-3.6-flash",
           contents,
           config: {
             systemInstruction: systemPrompt,
@@ -138,52 +161,59 @@ async function startServer() {
           },
         });
 
-        const reply = response.text || 'Je n\'ai pas pu générer de réponse. N\'hésite pas à reformuler ta question.';
-        return res.json({ reply, provider: 'gemini' });
+        const reply =
+          response.text ||
+          "Je n'ai pas pu générer de réponse. N'hésite pas à reformuler ta question.";
+        return res.json({ reply, provider: "gemini" });
       }
 
       // 2. Fallback to Anthropic Claude if ANTHROPIC_API_KEY is configured
-      if (anthropicKey && anthropicKey.trim() !== '') {
-        const anthropicMessages = messages.map((m: { role: string; text: string }) => ({
-          role: m.role === 'assistant' ? 'assistant' : 'user',
-          content: m.text,
-        }));
+      if (anthropicKey && anthropicKey.trim() !== "") {
+        const anthropicMessages = messages.map(
+          (m: { role: string; text: string }) => ({
+            role: m.role === "assistant" ? "assistant" : "user",
+            content: m.text,
+          }),
+        );
 
         const userContent: Array<
-          | { type: 'text'; text: string }
-          | { type: 'image'; source: { type: 'base64'; media_type: string; data: string } }
+          | { type: "text"; text: string }
+          | {
+              type: "image";
+              source: { type: "base64"; media_type: string; data: string };
+            }
         > = [];
 
         if (attachedImage && attachedImage.data) {
           userContent.push({
-            type: 'image',
+            type: "image",
             source: {
-              type: 'base64',
-              media_type: attachedImage.mediaType || 'image/jpeg',
+              type: "base64",
+              media_type: attachedImage.mediaType || "image/jpeg",
               data: attachedImage.data,
             },
           });
         }
 
         userContent.push({
-          type: 'text',
-          text: prompt || 'Peux-tu m\'aider avec cet exercice ?',
+          type: "text",
+          text: prompt || "Peux-tu m'aider avec cet exercice ?",
         });
 
         anthropicMessages.push({
-          role: 'user',
+          role: "user",
           content: userContent,
         });
 
-        const claudeRes = await fetch('https://api.anthropic.com/v1/messages', {
-          method: 'POST',
+        const claudeRes = await fetch("https://api.anthropic.com/v1/messages", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': anthropicKey,
-            'anthropic-version': '2023-06-01',
+            "Content-Type": "application/json",
+            "x-api-key": anthropicKey,
+            "anthropic-version": "2023-06-01",
           },
           body: JSON.stringify({
-            model: 'claude-3-5-sonnet-20241022',
+            model: "claude-3-5-sonnet-20241022",
             max_tokens: 1500,
             system: systemPrompt,
             messages: anthropicMessages,
@@ -192,7 +222,7 @@ async function startServer() {
 
         if (!claudeRes.ok) {
           const errData = await claudeRes.text();
-          console.error('Erreur Anthropic:', errData);
+          console.error("Erreur Anthropic:", errData);
           return res.status(claudeRes.status).json({
             error: `Erreur API Anthropic: ${claudeRes.statusText}`,
             details: errData,
@@ -202,48 +232,49 @@ async function startServer() {
         const data = await claudeRes.json();
         const reply =
           data?.content
-            ?.filter((b: { type: string }) => b.type === 'text')
+            ?.filter((b: { type: string }) => b.type === "text")
             ?.map((b: { text: string }) => b.text)
-            ?.join('\n') || 'Réponse vide reçue.';
+            ?.join("\n") || "Réponse vide reçue.";
 
-        return res.json({ reply, provider: 'anthropic' });
+        return res.json({ reply, provider: "anthropic" });
       }
 
       // 3. If neither key is found
       return res.status(400).json({
-        error: 'Aucune clé API configurée.',
-        message: 'Veuillez configurer GEMINI_API_KEY ou ANTHROPIC_API_KEY dans les paramètres pour activer la correction IA.',
+        error: "Aucune clé API configurée.",
+        message:
+          "Veuillez configurer GEMINI_API_KEY ou ANTHROPIC_API_KEY dans les paramètres pour activer la correction IA.",
       });
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : String(err);
-      console.error('Erreur dans /api/chat:', errorMessage);
+      console.error("Erreur dans /api/chat:", errorMessage);
       return res.status(500).json({
-        error: 'Une erreur est survenue lors de la génération de la réponse.',
+        error: "Une erreur est survenue lors de la génération de la réponse.",
         details: errorMessage,
       });
     }
   });
 
   // Vite middleware for development
-  if (process.env.NODE_ENV !== 'production') {
+  if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
       server: { middlewareMode: true },
-      appType: 'spa',
+      appType: "spa",
     });
     app.use(vite.middlewares);
   } else {
-    const distPath = path.join(process.cwd(), 'dist');
+    const distPath = path.join(process.cwd(), "dist");
     app.use(express.static(distPath));
-    app.get('*', (req, res) => {
-      res.sendFile(path.join(distPath, 'index.html'));
+    app.get("*", (req, res) => {
+      res.sendFile(path.join(distPath, "index.html"));
     });
   }
 
-  app.listen(PORT, '0.0.0.0', () => {
+  app.listen(PORT, "0.0.0.0", () => {
     console.log(`Serveur Tremplin actif sur http://0.0.0.0:${PORT}`);
   });
 }
 
 startServer().catch((err) => {
-  console.error('Erreur lors du démarrage du serveur:', err);
+  console.error("Erreur lors du démarrage du serveur:", err);
 });
