@@ -1,5 +1,4 @@
 import { GoogleGenAI } from "@google/genai";
-import type { Config } from "@netlify/functions";
 
 const DEFAULT_SYSTEM_PROMPT = `Tu es le tuteur pédagogique personnel intégré à « Tremplin », une plateforme d’excellence dédiée à la préparation aux examens pour les élèves en classes d’examen, notamment de 3e et de Terminale. Elle couvre l’ensemble des matières essentielles : Mathématiques, Physique-Chimie, SVT, Français, Anglais, Histoire-Géographie et Philosophie.
 
@@ -151,40 +150,66 @@ export default async (req: Request) => {
       parts: currentParts,
     });
 
-    // Appel Gemini
-    const response = await ai.models.generateContent({
-      model: "gemini-3.1-flash-lite",
-      contents,
-      config: {
-        systemInstruction: systemPrompt,
-        temperature: 0.7,
-      },
-    });
+    // Liste des modèles (du meilleur au plus bas)
+    const models = [
+      "gemini-3.1-flash-lite",
+      "gemini-3.5-flash-lite",
+      "gemini-3-flash",
+    ];
 
-    const reply =
-      response.text ||
-      "Je n'ai pas pu générer de réponse. N'hésite pas à reformuler ta question.";
+    let lastError: any = null;
 
-    return Response.json({
-      reply,
-      provider: "gemini",
-    });
-  } catch (error) {
-    console.error("Erreur Gemini:", error);
+    for (const model of models) {
+      try {
+        const response = await ai.models.generateContent({
+          model,
+          contents,
+          config: {
+            systemInstruction: systemPrompt,
+          },
+        });
 
-    const errorMessage = error instanceof Error ? error.message : String(error);
+        const reply = response.text || "Je n'ai pas pu générer de réponse.";
+
+        return Response.json({
+          reply,
+          provider: model,
+        });
+      } catch (error: any) {
+        console.error(`Erreur avec ${model}:`, error);
+
+        if (error?.status === 429) {
+          lastError = error;
+          continue;
+        }
+
+        return Response.json(
+          {
+            error: "Erreur lors de la génération de la réponse.",
+            details: error instanceof Error ? error.message : String(error),
+          },
+          { status: 500 },
+        );
+      }
+    }
 
     return Response.json(
       {
-        error: "Erreur lors de la génération de la réponse.",
-        details: errorMessage,
+        error: "Limite gratuite atteinte.",
+        message: "Tous les modèles sont temporairement indisponibles.",
+        details: lastError?.message,
+      },
+      { status: 429 },
+    );
+  } catch (error: any) {
+    console.error("Erreur globale :", error);
+
+    return Response.json(
+      {
+        error: "Erreur serveur.",
+        details: error instanceof Error ? error.message : String(error),
       },
       { status: 500 },
     );
   }
-};
-
-export const config: Config = {
-  path: "/api/chat",
-  method: "POST",
 };
