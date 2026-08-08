@@ -150,17 +150,20 @@ export default async (req: Request) => {
       parts: currentParts,
     });
 
-    // Liste des modèles (du meilleur au plus bas)
+    // Modèles utilisés en cascade
     const models = [
       "gemini-3.1-flash-lite",
       "gemini-3.5-flash-lite",
       "gemini-3-flash",
     ];
 
-    let lastError: any = null;
+    let lastError: unknown = null;
 
+    // Essayer les modèles l'un après l'autre
     for (const model of models) {
       try {
+        console.log(`Tentative avec ${model}`);
+
         const response = await ai.models.generateContent({
           model,
           contents,
@@ -169,22 +172,34 @@ export default async (req: Request) => {
           },
         });
 
-        const reply = response.text || "Je n'ai pas pu générer de réponse.";
+        const reply =
+          response.text ||
+          "Je n'ai pas pu générer de réponse. N'hésite pas à reformuler ta question.";
+
+        console.log(`Réponse obtenue avec ${model}`);
 
         return Response.json({
           reply,
           provider: model,
         });
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error(`Erreur avec ${model}:`, error);
 
-        // Si quota atteint → on passe au suivant
-        if (error?.status === 429) {
+        const status =
+          typeof error === "object" && error !== null && "status" in error
+            ? (error as { status?: number }).status
+            : undefined;
+
+        // Quota atteint → essayer le modèle suivant
+        if (status === 429) {
           lastError = error;
+          console.log(
+            `Quota atteint pour ${model}. Passage au modèle suivant.`,
+          );
           continue;
         }
 
-        // Autre erreur → on stop
+        // Autre erreur → arrêter
         const errorMessage =
           error instanceof Error ? error.message : String(error);
 
@@ -198,17 +213,32 @@ export default async (req: Request) => {
       }
     }
 
-    // Si tous les modèles sont bloqués
+    // Tous les modèles ont atteint leur quota
+    const lastErrorMessage =
+      lastError instanceof Error
+        ? lastError.message
+        : String(lastError || "Quota dépassé");
+
     return Response.json(
       {
         error: "Limite gratuite atteinte.",
         message:
-          "Tous les modèles sont temporairement indisponibles. Réessaie plus tard.",
-        details: lastError?.message,
+          "Tous les modèles Gemini sont temporairement indisponibles. Réessaie plus tard.",
+        details: lastErrorMessage,
       },
       { status: 429 },
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Erreur inattendue :", error);
+
+    const errorMessage = error instanceof Error ? error.message : String(error);
+
+    return Response.json(
+      {
+        error: "Erreur serveur.",
+        details: errorMessage,
+      },
+      { status: 500 },
+    );
   }
 };
